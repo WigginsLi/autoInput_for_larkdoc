@@ -13,15 +13,18 @@ export default async function main(uiBuilder: UIBuilder) {
     const arr = text.split(/[,，]/);
     const trimmedArr = arr.map(value => value.trim());
     let select = new Array(trimmedArr.length).fill(false);
-    console.log(trimmedArr);
+    // console.log(trimmedArr);
 
     //获取当前所选的信息。 Get the current selection
     const selection = await bitable.base.getSelection();
     //通过tableId获取table数据表。 Find current table by tableId
     const table = await bitable.base.getTableById(selection?.tableId!);
     //获取table数据表的字段列表元信息。Get table's field meta list
-    const fieldMetaList = await table.getFieldMetaList();
-    console.log(fieldMetaList);
+    // const fieldMetaList = await table.getFieldMetaList();
+    const view = await table.getViewById(selection?.viewId!);
+    const fieldMetaList = await view.getVisibleFieldIdList();
+    // console.log(fieldMetaList);
+    // console.log(viewfieldMetaList);
 
     const fieldLen = fieldMetaList.length;
 
@@ -29,14 +32,16 @@ export default async function main(uiBuilder: UIBuilder) {
     for (let i = 0; i < fieldLen; i++) {
       // console.log(i);
       // console.log(fieldMetaList[i].type);
+      const field = await table.getFieldMetaById(fieldMetaList[i]);
+      // console.log(field);
       let flag = false;
-      if (fieldMetaList[i].type == 3) { // 单选
-        const singleSelectField = await table.getField<ISingleSelectField>(fieldMetaList[i].id);
-        const options = await fieldMetaList[i].property.options;
+      if (field.type == 3) { // 单选
+        const singleSelectField = await table.getField<ISingleSelectField>(field.id);
+        const options = await field.property.options;
         for (let j = 0; j < options.length && !flag; j++) {
           for (let k = 0; k < trimmedArr.length && !flag; k++) {
             if (options[j].name.includes(trimmedArr[k]) && !select[k]) {
-              console.log(options[j].name);
+              // console.log(options[j].name);
               const cell = await singleSelectField.createCell(options[j].name);
               input.push(cell);
               select[k] = true;
@@ -45,21 +50,21 @@ export default async function main(uiBuilder: UIBuilder) {
           }
         }
       }
-      else if (fieldMetaList[i].type == 5) { //日期 
-        const dateTimeField = await table.getField<IDateTimeField>(fieldMetaList[i].id);
+      else if (field.type == 5) { //日期 
+        const dateTimeField = await table.getField<IDateTimeField>(field.id);
         for (let k = 0; k < trimmedArr.length && !flag; k++) {
           try {
             const dateObj = parseDateString(trimmedArr[k]);
-            console.log(dateObj);
+            // console.log(dateObj);
             if (!select[k]) {
-              console.log("enter");
+              // console.log("enter");
               const cell = await dateTimeField.createCell(dateObj.getTime());
               input.push(cell);
               select[k] = true;
               flag = true;
             }
           } catch (error) {
-            console.error("An error occurred: ", error);
+            // console.error("An error occurred: ", error);
           }
         }
 
@@ -67,9 +72,10 @@ export default async function main(uiBuilder: UIBuilder) {
     }
 
     for (let i = 0; i < fieldLen; i++) {
+      const field = await table.getFieldMetaById(fieldMetaList[i]);
       let flag = false;
-      if (fieldMetaList[i].type == 1) { // 文本
-        const textField = await table.getField<ITextField>(fieldMetaList[i].id);
+      if (field.type == 1) { // 文本
+        const textField = await table.getField<ITextField>(field.id);
         for (let k = 0; k < trimmedArr.length && !flag; k++) {
           if (!select[k]) {
             const cell = await textField.createCell(trimmedArr[k]);
