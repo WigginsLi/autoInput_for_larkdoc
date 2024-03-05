@@ -5,7 +5,7 @@ export default async function main(uiBuilder: UIBuilder) {
     formItems: [
       // form.tableSelect('table', { label: '选择数据表' }),
       // form.viewSelect('view', { label: '选择视图', sourceTable: 'table' }),
-      form.textArea('text', { label: '输入文本（目前仅支持单选、日期、普通文本框自动插入）', defaultValue: '产品会议，2 参加会议，营销，中，被动，2月26日 10:30，2月26日 11:00', placeholder: '请使用逗号（中英文均可）隔开每个输入的字段' }),
+      form.textArea('text', { label: '输入文本（单选框仅支持识别已有选项，日期仅支持“X月X日 XX:XX”格式，其余文本按顺序填充到表格内）', defaultValue: '产品会议，2 参加会议，营销，中，被动，2月26日 10:30，2月26日 11:00', placeholder: '请使用逗号（中英文均可）隔开每个输入的字段' }),
     ],
     buttons: ['识别', '取消'],
   }), async ({ values }) => {
